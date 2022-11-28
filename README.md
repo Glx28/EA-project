@@ -11,3 +11,6 @@ https://www.tensorflow.org/tutorials/structured_data/preprocessing_layers
 
 ## The Google Docs
 https://docs.google.com/document/d/1dDU_3vaE14xaNPQU9zoOA1TyPU-jAJEOQKXxG6AkmHQ/edit?usp=sharing 
+
+## Pytorch stuff
+https://machinelearningmastery.com/pytorch-tutorial-develop-deep-learning-models/
