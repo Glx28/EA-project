@@ -5,6 +5,7 @@ some code that does not suck.
 
 ## Covid19-Mexican-Patients' Dataset (Covid19MPD) Classification and Prediction Using Feature Importance
 https://onlinelibrary.wiley.com/doi/10.1002/cpe.6675
+covid_res: 1 indicates person is covid +ve, 2 indicates person is covide -ve, 3 indicates result is in awaiting process.
 
 ## Keras preprocessing layers
 https://www.tensorflow.org/tutorials/structured_data/preprocessing_layers
