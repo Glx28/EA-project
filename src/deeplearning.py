@@ -4,6 +4,7 @@ import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
 import tensorflow as tf
+from imblearn.over_sampling import RandomOverSampler
 
 
 def df_to_dataset(dataframe, shuffle=True, batch_size=32):
@@ -40,6 +41,12 @@ def get_category_encoding_layer(name, dataset, dtype, max_tokens=None):
     return lambda feature: encoder(index(feature))
 
 
+def balance_data_oversampling(dataframe):
+    ros = RandomOverSampler(random_state=0)
+    data_resampled, labels_resampled = ros.fit_resample(dataframe, dataframe['target'])
+    return data_resampled
+
+
 class DeepLearningModel:
     def __init__(self):
         self.train_ds = None
@@ -72,7 +79,9 @@ class DeepLearningModel:
         dataframe['target'] = np.where(dataframe['date_died'] == '9999-99-99', 0, 1)
         if debug_msg:
             print(dataframe['target'])
+
         dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
+        dataframe = balance_data_oversampling(dataframe)
 
         train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
 
@@ -138,8 +147,13 @@ class DeepLearningModel:
 def main():
     dlm = DeepLearningModel()
 
-    spec = [4, 16, 1, 64, 5, 128, 8, 128, 1, 512, 1, 512, 2, 512, 1, 1024, 9]
+    spec = [1, 128, 1, 64, 5, 128, 8, 128, 1, 512, 1, 512, 2, 512, 1, 1024, 9]
     dlm.build(spec)
+    acc = dlm.evaluate()
+    print("Accuracy", acc)
+
+    spec1 = [4, 16, 1, 64, 5, 128, 8, 128, 1, 512, 1, 512, 2, 512, 1, 1024, 9]
+    dlm.build(spec1)
     acc = dlm.evaluate()
     print("Accuracy", acc)
 
