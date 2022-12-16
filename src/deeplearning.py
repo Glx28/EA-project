@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 import os
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
 import tensorflow as tf
 from imblearn.over_sampling import RandomOverSampler
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
 
 
 def df_to_dataset(dataframe, shuffle=True, batch_size=32):
@@ -48,7 +47,7 @@ def balance_data_oversampling(dataframe):
 
 
 class DeepLearningModel:
-    def __init__(self):
+    def __init__(self, dataset: str):
         self.train_ds = None
         self.val_ds = None
         self.test_ds = None
@@ -68,11 +67,15 @@ class DeepLearningModel:
             9: 'exponential'
         }
         self.preprocessing()
+        self.dataset_path = dataset
 
     def preprocessing(self, debug_msg=False):
         tf.get_logger().setLevel('ERROR')
 
-        dataframe = pd.read_csv('..\covid.csv')
+        #print("Current WD: ", os.getcwd())
+        #dataframe = pd.read_csv('..\covid.csv')
+        #os.chdir(os.pardir)
+        dataframe = pd.read_csv(self.dataset_path)
         if debug_msg:
             print(dataframe.head())
 
@@ -90,7 +93,7 @@ class DeepLearningModel:
             print(len(val), 'validation examples')
             print(len(test), 'test examples')
 
-        batch_size = 256
+        batch_size = 32 #256
         self.train_ds = df_to_dataset(train, batch_size=batch_size)
         self.val_ds = df_to_dataset(val, shuffle=False, batch_size=batch_size)
         self.test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
@@ -161,6 +164,7 @@ def main():
     dlm.build(spec2)
     acc = dlm.evaluate()
     print("Accuracy", acc)
+    
 
 
 if __name__ == '__main__':
