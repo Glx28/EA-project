@@ -166,9 +166,7 @@ def demo():
     plt.show()
 
 
-if __name__ == "__main__":
-    #demo()  # NOTE: use this for trying out the GA algorithm
-
+def main():
     # define the total iterations
     n_iter = 30
 
@@ -191,5 +189,10 @@ if __name__ == "__main__":
     print("Best: ", best)
     print("Score: ", score)
     print(fitness_story)
+
+
+if __name__ == "__main__":
+    #demo()  # NOTE: use this for trying out the GA algorithm
+    main()
 
     
