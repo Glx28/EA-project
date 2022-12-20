@@ -7,6 +7,7 @@ from deeplearning import DeepLearningModel
 
 
 def accuracy_score(spec, path):
+    print("[Info] > Evaluating model accuracy of spec: {}".format(spec))
     dlm = DeepLearningModel(path)
     dlm.build(spec)
     acc = dlm.evaluate()
@@ -83,11 +84,13 @@ def create_initial_population(n_pop: int) -> list:
 
         init_population.append(individuum)
     
+    print("[Info] > Created initial population: {}".format(init_population))
     return init_population
 
 
 # genetic algorithm
 def genetic_algorithm(objective, n_iter: int, n_pop: int, r_cross, r_mut_nlayers, r_mut_layers, mutation: bool=True, n_point: int=1, dataset_path: str=None):
+    assert n_pop%2==0, "Population number should be even number!"
     fitness_tracker = list()
     
     # initial population of random bitstring
@@ -111,7 +114,7 @@ def genetic_algorithm(objective, n_iter: int, n_pop: int, r_cross, r_mut_nlayers
         for i in range(n_pop):
             if scores[i] > best_eval:
                 best, best_eval = pop[i], scores[i]
-                print(">%d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
+                print("[Info] > Generation: %d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
         fitness_tracker.append(best_eval)
 
         # select parents
@@ -168,10 +171,10 @@ def demo():
 
 def main():
     # define the total iterations
-    n_iter = 30
+    n_iter = 10
 
     # define the population size
-    n_pop = 10
+    n_pop = 8
 
     # crossover rate
     r_cross = 1

@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import tensorflow as tf
 from imblearn.over_sampling import RandomOverSampler
-#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
 
 
 def df_to_dataset(dataframe, shuffle=True, batch_size=32):
@@ -54,7 +54,7 @@ class DeepLearningModel:
         self.encoded_features = []
         self.all_inputs = []
         self.model = None
-        self.n_epochs = 10
+        self.n_epochs = 3
         self.activation_dct = {
             1: 'relu',
             2: 'sigmoid',
@@ -67,7 +67,7 @@ class DeepLearningModel:
             9: 'exponential'
         }
         self.dataset_path = dataset
-        self.preprocessing()
+        self.preprocessing(debug_msg=False)
         
 
     def preprocessing(self, debug_msg=False):
@@ -94,7 +94,7 @@ class DeepLearningModel:
             print(len(val), 'validation examples')
             print(len(test), 'test examples')
 
-        batch_size = 32 #256
+        batch_size = 256
         self.train_ds = df_to_dataset(train, batch_size=batch_size)
         self.val_ds = df_to_dataset(val, shuffle=False, batch_size=batch_size)
         self.test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
