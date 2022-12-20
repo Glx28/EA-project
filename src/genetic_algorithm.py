@@ -78,7 +78,7 @@ def create_initial_population(n_pop: int) -> list:
 
         for _ in range(8):
             n_neurons = 2**randint(0, high=11)  # generate values between 1-1024
-            activationf_type = randint(0, high=10)  # generate values between 1-9
+            activationf_type = randint(1, high=10)  # generate values between 1-9
             individuum += [n_neurons, activationf_type]
 
         init_population.append(individuum)
