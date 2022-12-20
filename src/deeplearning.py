@@ -46,13 +46,76 @@ def balance_data_oversampling(dataframe):
     return data_resampled
 
 
-class DeepLearningModel:
-    def __init__(self, dataset: str):
-        self.train_ds = None
-        self.val_ds = None
-        self.test_ds = None
+class DLModelHelper:
+    def __init__(self, dataset: str, debug_msg: bool=False, batch_size: int=256):
+
         self.encoded_features = []
         self.all_inputs = []
+
+        tf.get_logger().setLevel('ERROR')
+
+        #print("Current WD: ", os.getcwd())
+        #dataframe = pd.read_csv('..\covid.csv')
+        #os.chdir(os.pardir)
+        dataframe = pd.read_csv(dataset)
+        if debug_msg:
+            print(dataframe.head())
+
+        dataframe['target'] = np.where(dataframe['date_died'] == '9999-99-99', 0, 1)
+        if debug_msg:
+            print(dataframe['target'])
+
+        dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
+        dataframe = balance_data_oversampling(dataframe)
+
+        train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
+
+        if debug_msg:
+            print(len(train), 'training examples')
+            print(len(val), 'validation examples')
+            print(len(test), 'test examples')
+
+        self.train_ds = df_to_dataset(train, batch_size=batch_size)
+        self.val_ds = df_to_dataset(val, shuffle=False, batch_size=batch_size)
+        self.test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
+
+        [(train_features, label_batch)] = self.train_ds.take(1)
+        if debug_msg:
+            print('Every feature:', list(train_features.keys()))
+            print('A batch of ages:', train_features['age'])
+            print('A batch of targets:', label_batch)
+
+        categorical_cols = ['age', 'sex', 'patient_type', 'intubed', 'pneumonia', 'pregnancy', 'diabetes', 'copd',
+                            'asthma',
+                            'inmsupr', 'hypertension',
+                            'other_disease', 'cardiovascular', 'obesity', 'renal_chronic', 'tobacco',
+                            'contact_other_covid',
+                            'covid_res', 'icu']
+        for header in categorical_cols:
+            categorical_col = tf.keras.Input(shape=(1,), name=header, dtype='int64')
+            encoding_layer = get_category_encoding_layer(name=header,
+                                                         dataset=self.train_ds,
+                                                         dtype='int64',
+                                                         max_tokens=5)
+            encoded_categorical_col = encoding_layer(categorical_col)
+            self.all_inputs.append(categorical_col)
+            self.encoded_features.append(encoded_categorical_col)
+
+    def get_ds(self):
+        return self.train_ds, self.val_ds, self.test_ds
+
+    def get_inputs(self):
+        return self.all_inputs
+
+    def get_encoded_features(self):
+        return self.encoded_features
+
+
+class DeepLearningModel:
+    def __init__(self, dataset: str, helper: DLModelHelper):
+        self.train_ds, self.val_ds, self.test_ds = helper.get_ds()
+        self.encoded_features = helper.get_encoded_features()
+        self.all_inputs = helper.get_inputs()
         self.model = None
         self.n_epochs = 3
         self.activation_dct = {
@@ -67,7 +130,7 @@ class DeepLearningModel:
             9: 'exponential'
         }
         self.dataset_path = dataset
-        self.preprocessing(debug_msg=False)
+        #self.preprocessing()
         
 
     def preprocessing(self, debug_msg=False):

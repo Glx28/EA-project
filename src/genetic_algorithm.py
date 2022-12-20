@@ -3,12 +3,14 @@ from numpy.random import randint
 from numpy.random import rand
 import numpy as np
 import matplotlib.pyplot as plt
-from deeplearning import DeepLearningModel
+from deeplearning import DeepLearningModel, DLModelHelper
 
+dl_helper = None
 
 def accuracy_score(spec, path):
-    print("[Info] > Evaluating model accuracy of spec: {}".format(spec))
-    dlm = DeepLearningModel(path)
+    print("[Info][accuracy_score] > Evaluating model accuracy of spec: {}".format(spec))
+    global dl_helper
+    dlm = DeepLearningModel(path, dl_helper)
     dlm.build(spec)
     acc = dlm.evaluate()
     return acc * 100  # return the accuracy in percent
@@ -84,7 +86,7 @@ def create_initial_population(n_pop: int) -> list:
 
         init_population.append(individuum)
     
-    print("[Info] > Created initial population: {}".format(init_population))
+    print("[Info][create_initial_population] > Created initial population: {}".format(init_population))
     return init_population
 
 
@@ -104,6 +106,8 @@ def genetic_algorithm(objective, n_iter: int, n_pop: int, r_cross, r_mut_nlayers
 
     # enumerate generations
     for gen in range(n_iter):
+        print("[Info][genetic_algorithm] > Starting generation: {}".format(gen))
+
         # evaluate all candidates in the population
         if dataset_path is not None:
             scores = [objective(c, dataset_path) for c in pop]
@@ -114,7 +118,7 @@ def genetic_algorithm(objective, n_iter: int, n_pop: int, r_cross, r_mut_nlayers
         for i in range(n_pop):
             if scores[i] > best_eval:
                 best, best_eval = pop[i], scores[i]
-                print("[Info] > Generation: %d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
+                print("[Info][genetic_algorithm] > Generation: %d, new best f(%s) = %.3f" % (gen,  pop[i], scores[i]))
         fitness_tracker.append(best_eval)
 
         # select parents
@@ -187,6 +191,8 @@ def main():
     dataset_path = "covid.csv"
 
     # perform the genetic algorithm search
+    global dl_helper
+    dl_helper = DLModelHelper(dataset_path)
     best, score, fitness_story = genetic_algorithm(accuracy_score, n_iter, n_pop, r_cross, r_mut_nlayers, r_mut_layers, mutation=False, n_point=3, dataset_path=dataset_path)
     print('Done!')
     print("Best: ", best)

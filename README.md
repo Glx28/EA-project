@@ -14,3 +14,6 @@ https://docs.google.com/document/d/1dDU_3vaE14xaNPQU9zoOA1TyPU-jAJEOQKXxG6AkmHQ/
 
 ## Pytorch stuff
 https://machinelearningmastery.com/pytorch-tutorial-develop-deep-learning-models/
+
+# Cheatsheet
+Start-Transcript filename.txt
