@@ -66,8 +66,9 @@ class DeepLearningModel:
             8: 'elu',
             9: 'exponential'
         }
-        self.preprocessing()
         self.dataset_path = dataset
+        self.preprocessing()
+        
 
     def preprocessing(self, debug_msg=False):
         tf.get_logger().setLevel('ERROR')
