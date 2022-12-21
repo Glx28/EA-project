@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import tensorflow as tf
 from imblearn.over_sampling import RandomOverSampler
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # hide tf information messages
 
 
 def df_to_dataset(dataframe, shuffle=True, batch_size=32):
@@ -66,7 +66,7 @@ class DLModelHelper:
             print(dataframe['target'])
 
         dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
-        dataframe = balance_data_oversampling(dataframe)
+        # dataframe = balance_data_oversampling(dataframe)
 
         train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
 
@@ -117,7 +117,7 @@ class DeepLearningModel:
         self.encoded_features = helper.get_encoded_features()
         self.all_inputs = helper.get_inputs()
         self.model = None
-        self.n_epochs = 3
+        self.n_epochs = 5
         self.activation_dct = {
             1: 'relu',
             2: 'sigmoid',
@@ -148,7 +148,7 @@ class DeepLearningModel:
             print(dataframe['target'])
 
         dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
-        dataframe = balance_data_oversampling(dataframe)
+        # dataframe = balance_data_oversampling(dataframe)
 
         train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
 

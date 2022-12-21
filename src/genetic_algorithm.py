@@ -175,10 +175,10 @@ def demo():
 
 def main():
     # define the total iterations
-    n_iter = 10
+    n_iter = 21
 
     # define the population size
-    n_pop = 8
+    n_pop = 6
 
     # crossover rate
     r_cross = 1
@@ -188,7 +188,7 @@ def main():
     r_mut_layers = 0.2  # this controls the probability of mutating only the layers individually 
 
     # configure deep learning model stuff
-    dataset_path = "covid.csv"
+    dataset_path = "../covid.csv"
 
     # perform the genetic algorithm search
     global dl_helper
