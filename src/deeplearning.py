@@ -47,7 +47,7 @@ def balance_data_oversampling(dataframe):
 
 
 class DLModelHelper:
-    def __init__(self, dataset: str, debug_msg: bool=False, batch_size: int=256):
+    def __init__(self, dataset: str, debug_msg: bool=False, batch_size: int=256, enable_oversampling: bool=False):
 
         self.encoded_features = []
         self.all_inputs = []
@@ -57,6 +57,7 @@ class DLModelHelper:
         #print("Current WD: ", os.getcwd())
         #dataframe = pd.read_csv('..\covid.csv')
         #os.chdir(os.pardir)
+        print("[Info][DLModelHelper] > Preprocessing Dataset")
         dataframe = pd.read_csv(dataset)
         if debug_msg:
             print(dataframe.head())
@@ -66,7 +67,11 @@ class DLModelHelper:
             print(dataframe['target'])
 
         dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
-        dataframe = balance_data_oversampling(dataframe)
+        if enable_oversampling:
+            print("[Info][DLModelHelper] > Oversampling enabled")
+            dataframe = balance_data_oversampling(dataframe)
+        else:
+            print("[Info][DLModelHelper] > Oversampling disabled")
 
         train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
 
@@ -100,6 +105,8 @@ class DLModelHelper:
             encoded_categorical_col = encoding_layer(categorical_col)
             self.all_inputs.append(categorical_col)
             self.encoded_features.append(encoded_categorical_col)
+        
+        print("[Info][DLModelHelper] > Dataset preprocessing done")
 
     def get_ds(self):
         return self.train_ds, self.val_ds, self.test_ds
@@ -117,7 +124,7 @@ class DeepLearningModel:
         self.encoded_features = helper.get_encoded_features()
         self.all_inputs = helper.get_inputs()
         self.model = None
-        self.n_epochs = 3
+        self.n_epochs = 4
         self.activation_dct = {
             1: 'relu',
             2: 'sigmoid',
@@ -132,57 +139,6 @@ class DeepLearningModel:
         self.dataset_path = dataset
         #self.preprocessing()
         
-
-    def preprocessing(self, debug_msg=False):
-        tf.get_logger().setLevel('ERROR')
-
-        #print("Current WD: ", os.getcwd())
-        #dataframe = pd.read_csv('..\covid.csv')
-        #os.chdir(os.pardir)
-        dataframe = pd.read_csv(self.dataset_path)
-        if debug_msg:
-            print(dataframe.head())
-
-        dataframe['target'] = np.where(dataframe['date_died'] == '9999-99-99', 0, 1)
-        if debug_msg:
-            print(dataframe['target'])
-
-        dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
-        dataframe = balance_data_oversampling(dataframe)
-
-        train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
-
-        if debug_msg:
-            print(len(train), 'training examples')
-            print(len(val), 'validation examples')
-            print(len(test), 'test examples')
-
-        batch_size = 256
-        self.train_ds = df_to_dataset(train, batch_size=batch_size)
-        self.val_ds = df_to_dataset(val, shuffle=False, batch_size=batch_size)
-        self.test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
-
-        [(train_features, label_batch)] = self.train_ds.take(1)
-        if debug_msg:
-            print('Every feature:', list(train_features.keys()))
-            print('A batch of ages:', train_features['age'])
-            print('A batch of targets:', label_batch)
-
-        categorical_cols = ['age', 'sex', 'patient_type', 'intubed', 'pneumonia', 'pregnancy', 'diabetes', 'copd',
-                            'asthma',
-                            'inmsupr', 'hypertension',
-                            'other_disease', 'cardiovascular', 'obesity', 'renal_chronic', 'tobacco',
-                            'contact_other_covid',
-                            'covid_res', 'icu']
-        for header in categorical_cols:
-            categorical_col = tf.keras.Input(shape=(1,), name=header, dtype='int64')
-            encoding_layer = get_category_encoding_layer(name=header,
-                                                         dataset=self.train_ds,
-                                                         dtype='int64',
-                                                         max_tokens=5)
-            encoded_categorical_col = encoding_layer(categorical_col)
-            self.all_inputs.append(categorical_col)
-            self.encoded_features.append(encoded_categorical_col)
 
     def build(self, specification):
         if len(specification) != 17:

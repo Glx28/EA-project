@@ -175,10 +175,10 @@ def demo():
 
 def main():
     # define the total iterations
-    n_iter = 10
+    n_iter = 14
 
     # define the population size
-    n_pop = 8
+    n_pop = 10
 
     # crossover rate
     r_cross = 1
