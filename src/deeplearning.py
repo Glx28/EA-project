@@ -47,7 +47,7 @@ def balance_data_oversampling(dataframe):
 
 
 class DLModelHelper:
-    def __init__(self, dataset: str, debug_msg: bool=False, batch_size: int=256):
+    def __init__(self, dataset: str, debug_msg: bool=False, batch_size: int=256, enable_oversampling: bool=False):
 
         self.encoded_features = []
         self.all_inputs = []
@@ -57,6 +57,7 @@ class DLModelHelper:
         #print("Current WD: ", os.getcwd())
         #dataframe = pd.read_csv('..\covid.csv')
         #os.chdir(os.pardir)
+        print("[Info][DLModelHelper] > Preprocessing Dataset")
         dataframe = pd.read_csv(dataset)
         if debug_msg:
             print(dataframe.head())
@@ -66,7 +67,13 @@ class DLModelHelper:
             print(dataframe['target'])
 
         dataframe = dataframe.drop(columns=['date_died', 'entry_date', 'id', 'date_symptoms'])
-        # dataframe = balance_data_oversampling(dataframe)
+
+        if enable_oversampling:
+            print("[Info][DLModelHelper] > Oversampling enabled")
+            dataframe = balance_data_oversampling(dataframe)
+        else:
+            print("[Info][DLModelHelper] > Oversampling disabled")
+
 
         train, val, test = np.split(dataframe.sample(frac=1), [int(0.8 * len(dataframe)), int(0.9 * len(dataframe))])
 
@@ -100,6 +107,8 @@ class DLModelHelper:
             encoded_categorical_col = encoding_layer(categorical_col)
             self.all_inputs.append(categorical_col)
             self.encoded_features.append(encoded_categorical_col)
+        
+        print("[Info][DLModelHelper] > Dataset preprocessing done")
 
     def get_ds(self):
         return self.train_ds, self.val_ds, self.test_ds
@@ -117,7 +126,9 @@ class DeepLearningModel:
         self.encoded_features = helper.get_encoded_features()
         self.all_inputs = helper.get_inputs()
         self.model = None
+
         self.n_epochs = 5
+
         self.activation_dct = {
             1: 'relu',
             2: 'sigmoid',
@@ -132,6 +143,7 @@ class DeepLearningModel:
         self.dataset_path = dataset
         #self.preprocessing()
         
+
 
     def preprocessing(self, debug_msg=False):
         tf.get_logger().setLevel('ERROR')
@@ -183,6 +195,7 @@ class DeepLearningModel:
             encoded_categorical_col = encoding_layer(categorical_col)
             self.all_inputs.append(categorical_col)
             self.encoded_features.append(encoded_categorical_col)
+
 
     def build(self, specification):
         if len(specification) != 17:
